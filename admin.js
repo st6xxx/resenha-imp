@@ -211,15 +211,26 @@ function handleCameraError(err) {
   console.error('[cam] erro:', err);
 }
 
-// botões de controle
-document.addEventListener('DOMContentLoaded', () => {
-  $('camStart')?.addEventListener('click', () => startCamera());
-  $('camRestart')?.addEventListener('click', () => {
-    const sel = $('camSelect');
-    startCamera(sel?.value || null);
+// botões de controle da câmera — atacha direto (script já roda com DOM pronto)
+const camStartBtn = $('camStart');
+const camRestartBtn = $('camRestart');
+const camSelectEl = $('camSelect');
+
+if (camStartBtn) {
+  camStartBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    startCamera();
   });
-  $('camSelect')?.addEventListener('change', (e) => startCamera(e.target.value));
-});
+}
+if (camRestartBtn) {
+  camRestartBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    startCamera(camSelectEl?.value || null);
+  });
+}
+if (camSelectEl) {
+  camSelectEl.addEventListener('change', (e) => startCamera(e.target.value));
+}
 
 let lastScanTime = 0;
 let lastScanText = '';
