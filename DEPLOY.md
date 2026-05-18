@@ -102,6 +102,7 @@ Se a função estiver dando pau, dá pra ver os logs em:
 | `RESEND_API_KEY` | API key do [Resend](https://resend.com) pra enviar email com os ingressos | recomendado |
 | `RESEND_FROM` | Email "from" customizado (ex: `Resenha IMP <festa@seudominio.com>`). Se vazio, usa o sandbox do Resend | opcional |
 | `SITE_URL` | URL pública do site (ex: `https://resenha.vercel.app`). Se vazio, detecta automaticamente do header | opcional |
+| `QR_SECRET` | String aleatória de 32+ chars usada pra assinar os QR codes rotativos. Se vazio, deriva da `ADMIN_PASSWORD` | opcional (mas recomendado) |
 
 Em `script.js` você também tem 3 constantes pra editar diretamente no código (não são env vars):
 

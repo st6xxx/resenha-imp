@@ -55,6 +55,64 @@
   border-color: rgba(255, 62, 165, 0.5);
 }
 
+/* ===== CONTAGEM REGRESSIVA DO QR ROTATIVO ===== */
+.qr-countdown {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 100px;
+  background: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.qr-countdown-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), rgba(255, 217, 61, 0.2));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.25s linear;
+  pointer-events: none;
+}
+.qr-countdown-text {
+  position: relative;
+  z-index: 1;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.qr-countdown.urgent .qr-countdown-bar {
+  background: linear-gradient(90deg, rgba(255, 217, 61, 0.35), rgba(255, 62, 165, 0.35));
+}
+.qr-countdown.urgent .qr-countdown-text { color: var(--yellow); }
+
+/* spinner durante refresh */
+.qr-refresh-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.65);
+  border-radius: inherit;
+  z-index: 2;
+}
+.qr-refresh-overlay[hidden] { display: none; }
+.qr-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(13, 8, 32, 0.18);
+  border-top-color: #0d0820;
+  border-radius: 50%;
+  animation: qrSpin 0.7s linear infinite;
+}
+@keyframes qrSpin { to { transform: rotate(360deg); } }
+
 .big-info {
   margin-bottom: 22px;
 }

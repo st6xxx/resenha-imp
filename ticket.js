@@ -30,9 +30,87 @@ function toast(msg) {
   t._timer = setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-function qrUrl(ticketId) {
-  return `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(ticketId)}`;
+function qrUrl(data) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=600x600&margin=12&data=${encodeURIComponent(data)}`;
 }
+
+// ===== TOKEN ROTATIVO =====
+// busca um novo token assinado do servidor (válido por 10s)
+async function fetchRotatingToken(ticketId) {
+  const r = await fetch(`/api/refresh-qr?ticket=${encodeURIComponent(ticketId)}`);
+  if (!r.ok) throw new Error('refresh failed');
+  return r.json();
+}
+
+let qrRefreshTimer = null;
+let qrCountdownTimer = null;
+
+async function refreshQrAndCountdown(ticketId) {
+  const overlay = $('qrRefreshOverlay');
+  if (overlay) overlay.hidden = false;
+  try {
+    const data = await fetchRotatingToken(ticketId);
+    if (!data.ok || !data.qr) throw new Error('no token');
+
+    // atualiza o QR
+    $('qrImg').src = qrUrl(data.qr);
+
+    // atualiza a contagem regressiva
+    const expiresAt = data.expires_at; // ms
+    startCountdown(expiresAt);
+  } catch (err) {
+    console.error('[qr] erro ao atualizar:', err);
+  } finally {
+    setTimeout(() => { if (overlay) overlay.hidden = true; }, 200);
+  }
+}
+
+function startCountdown(expiresAt) {
+  if (qrCountdownTimer) clearInterval(qrCountdownTimer);
+  const bar = $('countdownBar');
+  const txt = $('countdownText');
+  const wrap = $('countdown');
+
+  function tick() {
+    const left = Math.max(0, expiresAt - Date.now());
+    const leftSec = Math.ceil(left / 1000);
+    const pct = Math.max(0, Math.min(1, left / 10000));
+    if (bar) bar.style.transform = `scaleX(${pct})`;
+    if (txt) txt.textContent = `🔄 renova em ${leftSec}s`;
+    if (wrap) wrap.classList.toggle('urgent', leftSec <= 3);
+    if (left <= 0) clearInterval(qrCountdownTimer);
+  }
+  tick();
+  qrCountdownTimer = setInterval(tick, 250);
+}
+
+function startRotation(ticketId) {
+  // primeira chamada imediata
+  refreshQrAndCountdown(ticketId);
+  // a partir daqui renova a cada 10s alinhado
+  // (vamos checar a cada 2s pra renovar quando faltar pouco)
+  if (qrRefreshTimer) clearInterval(qrRefreshTimer);
+  qrRefreshTimer = setInterval(async () => {
+    // refaz quando o tempo restante é baixo (~1s) — alinha com a virada da janela
+    // mais simples: refaz a cada 10s exatos
+    await refreshQrAndCountdown(ticketId);
+  }, 10000);
+}
+
+function stopRotation() {
+  if (qrRefreshTimer) { clearInterval(qrRefreshTimer); qrRefreshTimer = null; }
+  if (qrCountdownTimer) { clearInterval(qrCountdownTimer); qrCountdownTimer = null; }
+}
+
+// reaproveita o ciclo quando o app volta do background (mobile)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && currentTicketId && !currentTicketUsed) {
+    refreshQrAndCountdown(currentTicketId);
+  }
+});
+
+let currentTicketId = null;
+let currentTicketUsed = false;
 
 function render(ticket) {
   $('loader').hidden = true;
@@ -42,17 +120,26 @@ function render(ticket) {
   $('gender').textContent = ticket.gender || 'Indeciso';
   $('gender').className = 'gender-pill ' + (ticket.gender || 'Indeciso');
   $('code').textContent = '#' + ticket.ticketId;
-  $('qrImg').src = qrUrl(ticket.ticketId);
 
   // status
   const status = $('status');
   const qrBox = $('qrBox');
+  const countdown = $('countdown');
+
+  currentTicketId = ticket.ticketId;
+  currentTicketUsed = !!ticket.used;
+
   if (ticket.used) {
     status.textContent = 'usado em ' + new Date(ticket.usedAt).toLocaleString('pt-BR');
     status.classList.add('used');
     qrBox.classList.add('used');
+    // ticket já usado: mostra QR estático (não tem mais valor) e some o contador
+    $('qrImg').src = qrUrl(ticket.ticketId);
+    if (countdown) countdown.hidden = true;
   } else {
     status.textContent = '✓ válido · pronto pra entrar';
+    // ticket válido: inicia rotação de token
+    startRotation(ticket.ticketId);
   }
 
   // links do grupo

@@ -38,8 +38,15 @@
   <div class="big-qr-wrap">
     <div class="big-qr" id="qrBox">
       <img id="qrImg" alt="QR" loading="eager" />
+      <div class="qr-refresh-overlay" id="qrRefreshOverlay" hidden>
+        <div class="qr-spinner"></div>
+      </div>
     </div>
     <div class="big-status" id="status">✓ válido</div>
+    <div class="qr-countdown" id="countdown">
+      <div class="qr-countdown-bar" id="countdownBar"></div>
+      <span class="qr-countdown-text" id="countdownText">🔄 renova em 10s</span>
+    </div>
   </div>
 
   <div class="big-info">
