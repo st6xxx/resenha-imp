@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Admin · RESENHA IMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Grotesque:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/admin.css" />
+</head>
+<body>
+
+<!-- LOGIN -->
+<section class="login" id="login">
+  <div class="login-card">
+    <h1>🛡️ admin</h1>
+    <p>painel de validação de ingressos</p>
+    <input type="password" id="pwd" placeholder="senha" autocomplete="off" />
+    <button id="loginBtn">entrar</button>
+    <p class="login-error" id="loginError" hidden>senha errada</p>
+  </div>
+</section>
+
+<!-- SCANNER -->
+<section class="scanner" id="scanner" hidden>
+  <header class="s-header">
+    <h1>scanear QR</h1>
+    <button class="s-logout" id="logout">sair</button>
+  </header>
+
+  <div class="stats" id="stats">—</div>
+
+  <div class="reader-wrap">
+    <div id="qrReader"></div>
+    <div class="reader-overlay" id="readerOverlay"></div>
+  </div>
+
+  <div class="result" id="result" hidden>
+    <div class="result-icon" id="resultIcon"></div>
+    <h2 id="resultTitle"></h2>
+    <p id="resultDetails"></p>
+    <button id="next">próximo</button>
+  </div>
+
+  <div class="history">
+    <h3>últimos scans</h3>
+    <ul id="history"></ul>
+  </div>
+</section>
+
+<!-- html5-qrcode library (scanner de câmera) -->
+<script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+<script src="/admin.js"></script>
+</body>
+</html>

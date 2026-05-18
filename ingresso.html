@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Seus Ingressos · RESENHA IMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Grotesque:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/ingresso.css" />
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<header class="t-header">
+  <a href="/" class="back" aria-label="voltar">←</a>
+  <div class="t-title">
+    <span class="kicker">RESENHA IMP · 05.06</span>
+    <h1>seus ingressos 🎟️</h1>
+  </div>
+</header>
+
+<div class="t-loader" id="loader">
+  <div class="spinner"></div>
+  <p>buscando seus ingressos...</p>
+</div>
+
+<div class="t-error" id="error" hidden>
+  <h2>😬 não rolou</h2>
+  <p id="errorMsg">não encontramos ingressos com esse link.</p>
+</div>
+
+<main class="t-list" id="ticketList" hidden></main>
+
+<footer class="t-footer" id="footer" hidden>
+  <p class="t-note">💾 <strong>salve essa página!</strong> clique em cada pessoa pra ver o QR code dela. Esse link é vitalício e só você tem ele.</p>
+  <div class="t-actions">
+    <button class="btn" id="copyLink">copiar link</button>
+    <button class="btn" id="waLink">mandar pro whatsapp</button>
+  </div>
+  <div class="t-meta">
+    <span id="stats"></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="/ingresso.js"></script>
+</body>
+</html>

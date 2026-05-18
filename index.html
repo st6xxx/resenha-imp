@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="RESENHA IMP — 5 de junho · Jardim Marapendi · Open Bar · DJ Cout" />
+<title>RESENHA IMP · 05.06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Grotesque:wght@400;500;700&family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- BLOBS DE FUNDO -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="blob blob-4"></div>
+<div class="grain"></div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span>RESENHA IMP</span><span class="dot">●</span>
+    <span>05 . 06</span><span class="dot">●</span>
+    <span>OPEN BAR</span><span class="dot">●</span>
+    <span>DJ COUT</span><span class="dot">●</span>
+    <span>RESENHA IMP</span><span class="dot">●</span>
+    <span>05 . 06</span><span class="dot">●</span>
+    <span>OPEN BAR</span><span class="dot">●</span>
+    <span>DJ COUT</span><span class="dot">●</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="floaters" aria-hidden="true">
+    <span class="floater" style="--top: 14%; --left: 6%;  --d: 0s;">🎉</span>
+    <span class="floater" style="--top: 22%; --left: 88%; --d: 0.6s;">✨</span>
+    <span class="floater" style="--top: 68%; --left: 10%; --d: 1.2s;">🪩</span>
+    <span class="floater" style="--top: 74%; --left: 86%; --d: 1.8s;">🥂</span>
+    <span class="floater" style="--top: 8%;  --left: 48%; --d: 2.4s;">🎊</span>
+    <span class="floater" style="--top: 44%; --left: 3%;  --d: 3s;">⭐</span>
+    <span class="floater" style="--top: 38%; --left: 94%; --d: 3.6s;">🍾</span>
+  </div>
+
+  <div class="hero-tag">
+    <span class="pulse"></span>
+    <span>05 . jun . 2026 · jardim marapendi</span>
+  </div>
+
+  <h1 class="hero-title">
+    <span class="word">RE</span><span class="word">SE</span><span class="word">NHA</span>
+    <span class="hero-imp">
+      <span class="imp-letter l1">I</span><span class="imp-letter l2">M</span><span class="imp-letter l3">P</span>
+    </span>
+  </h1>
+
+  <p class="hero-sub">
+    <strong>open bar</strong> · <strong>DJ Cout</strong> no comando · vagas limitadas
+  </p>
+
+  <div class="hero-cta">
+    <a href="#ingressos" class="btn btn-primary">
+      <span>comprar ingresso</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- HIGHLIGHTS COMPACTOS -->
+<section class="highlights">
+  <div class="hl-card hl-bar">
+    <div class="hl-emoji">🍹</div>
+    <h3>Open Bar</h3>
+    <p>bebida liberada a noite inteira</p>
+  </div>
+  <div class="hl-card hl-dj">
+    <div class="hl-emoji">🎧</div>
+    <h3>DJ Cout</h3>
+    <p>set list pra não parar de dançar</p>
+  </div>
+  <div class="hl-card hl-place">
+    <div class="hl-emoji">📍</div>
+    <h3>Jardim Marapendi</h3>
+    <p><a href="https://www.google.com/maps/search/?api=1&query=Condomínio+Jardim+Marapendi+Barra+da+Tijuca" target="_blank" rel="noopener">ver no mapa →</a></p>
+  </div>
+</section>
+
+<!-- INGRESSOS -->
+<section class="tix" id="ingressos">
+  <div class="tix-card">
+    <span class="kicker">ingressos</span>
+    <h2>quanto mais gente, <em>mais barato</em></h2>
+    <p class="tix-sub">a partir de R$ 60 por pessoa · máx. 10 pessoas por compra</p>
+
+    <!-- FAIXAS DE PREÇO POR PESSOA -->
+    <div class="tier-grid">
+      <div class="tier"><span class="tier-n">1–2</span><span class="tier-pp">R$ 60</span><span class="tier-each">cada</span></div>
+      <div class="tier"><span class="tier-n">3–4</span><span class="tier-pp">R$ 55</span><span class="tier-each">cada</span></div>
+      <div class="tier"><span class="tier-n">5–6</span><span class="tier-pp">R$ 52</span><span class="tier-each">cada</span></div>
+      <div class="tier"><span class="tier-n">7–9</span><span class="tier-pp">R$ 50</span><span class="tier-each">cada</span></div>
+      <div class="tier tier-best"><span class="tier-n">10</span><span class="tier-pp">R$ 48</span><span class="tier-each">cada</span></div>
+    </div>
+
+    <!-- CALCULADORA -->
+    <div class="calc">
+      <div class="calc-row">
+        <span class="calc-label">quantas pessoas?</span>
+        <div class="counter">
+          <button type="button" class="cbtn" id="minus" aria-label="diminuir">−</button>
+          <span class="count" id="qty">1</span>
+          <button type="button" class="cbtn" id="plus" aria-label="aumentar">+</button>
+        </div>
+      </div>
+
+      <div class="calc-break">
+        <div class="brk"><span>preço por pessoa</span><span id="perPerson">R$ 60</span></div>
+        <div class="brk brk-disc"><span>você economiza</span><span id="discount">R$ 0</span></div>
+        <div class="brk brk-total"><span>total</span><span id="total">R$ 60</span></div>
+      </div>
+
+      <!-- LISTA DE NOMES + IA DE GÊNERO -->
+      <div class="names-block">
+        <div class="names-head">
+          <span class="ai-tag">🤖 IA</span>
+          <span class="names-title">quem vai com você?</span>
+        </div>
+        <p class="names-hint">a IA tenta adivinhar o gênero pelo nome — clique nos botões pra trocar</p>
+        <div class="names-list" id="namesList"></div>
+        <div class="names-summary" id="namesSummary">—</div>
+      </div>
+
+      <!-- EMAIL — pra receber os ingressos -->
+      <div class="email-block">
+        <label class="email-label" for="buyerEmail">
+          <span class="email-icon">📧</span>
+          <span class="email-text">
+            <strong>seu email</strong>
+            <small>os ingressos serão enviados pra cá</small>
+          </span>
+        </label>
+        <input type="email" id="buyerEmail" class="email-input" placeholder="seu@email.com" autocomplete="email" required inputmode="email" />
+        <span class="email-error" id="emailError" hidden>email inválido</span>
+      </div>
+
+      <div class="pay-stack">
+        <button type="button" class="btn btn-primary big" onclick="pagarMP()">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2.5"/><path d="M2 11h20"/><path d="M6 15h4"/></svg>
+          <span>pagar <strong id="mpAmount">R$ 60</strong> no mercado pago</span>
+        </button>
+        <button type="button" class="btn btn-wa big" onclick="comprar()">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M20.52 3.48A11.78 11.78 0 0 0 12.06 0C5.5 0 .17 5.32.17 11.88c0 2.09.55 4.13 1.59 5.93L0 24l6.35-1.66a11.86 11.86 0 0 0 5.7 1.45h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.23-6.15-3.42-8.43Zm-8.46 18.27a9.85 9.85 0 0 1-5.02-1.37l-.36-.21-3.77.99 1.01-3.67-.23-.38a9.86 9.86 0 1 1 18.27-5.23c0 5.43-4.41 9.87-9.9 9.87Zm5.42-7.39c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.97-.94 1.17c-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.74-1.64-2.04-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.21-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.49 0 1.47 1.07 2.89 1.22 3.09.15.2 2.1 3.21 5.09 4.5.71.31 1.27.5 1.7.64.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.28.17-1.41-.07-.13-.27-.2-.57-.35Z"/></svg>
+          <span>confirmar no whatsapp</span>
+        </button>
+      </div>
+
+      <p class="pay-tip">✦ ao clicar no Mercado Pago o valor é copiado pra você só colar</p>
+    </div>
+  </div>
+</section>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-mark">
+    <span>R</span><span>·</span><span>I</span><span>·</span><span>M</span><span>·</span><span>P</span>
+  </div>
+  <p>05 de junho · Condomínio Jardim Marapendi · Barra da Tijuca, RJ</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/ingresso/:group/:ticket", "destination": "/ticket.html?group=:group&ticket=:ticket" },
+    { "source": "/ingresso/:id",            "destination": "/ingresso.html?id=:id" },
+    { "source": "/admin",                   "destination": "/admin.html" }
+  ]
+}
