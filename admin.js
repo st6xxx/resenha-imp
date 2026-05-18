@@ -114,6 +114,22 @@ function populateCamSelect(cams, currentId) {
 }
 
 async function startCamera(cameraId) {
+  // 0) verifica se a biblioteca de QR carregou
+  if (typeof Html5Qrcode === 'undefined' || window.HTML5QRCODE_FAILED) {
+    showCamPrompt(
+      'a biblioteca do scanner não carregou. tenta abrir a página de novo (recarrega).',
+      'recarregar',
+      true
+    );
+    // reset do botão pra ele funcionar como "recarregar"
+    const btn = $('camStart');
+    if (btn) {
+      btn.style.background = '';
+      btn.onclick = () => location.reload();
+    }
+    return;
+  }
+
   // 1) verifica suporte do navegador
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     showCamPrompt(

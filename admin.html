@@ -63,7 +63,20 @@
 </section>
 
 <!-- html5-qrcode library (scanner de câmera) -->
-<script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+<!-- usa jsdelivr (mais confiável que unpkg em alguns navegadores) -->
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+  // fallback caso o jsdelivr falhe: tenta o unpkg
+  if (typeof Html5Qrcode === 'undefined') {
+    document.write('<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>');
+  }
+</script>
+<script>
+  // se AINDA não carregou, mostra erro claro antes do admin.js rodar
+  if (typeof Html5Qrcode === 'undefined') {
+    window.HTML5QRCODE_FAILED = true;
+  }
+</script>
 <script src="/admin.js"></script>
 </body>
 </html>
