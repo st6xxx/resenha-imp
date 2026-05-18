@@ -237,19 +237,12 @@ console.log('[CAM-DEBUG] camStartBtn encontrado?', !!camStartBtn);
 if (camStartBtn) {
   camStartBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    console.log('[CAM-DEBUG] botão clicado!');
-    // feedback visual IMEDIATO pra confirmar que o click rolou
-    camStartBtn.textContent = '⏳ ligando câmera...';
-    camStartBtn.style.background = '#c5ff3d';
+    camStartBtn.textContent = '⏳ ligando...';
     startCamera().catch((err) => {
-      console.error('[CAM-DEBUG] startCamera lançou erro:', err);
-      alert('Erro ao iniciar câmera: ' + (err?.message || err));
+      console.error('[cam] startCamera erro:', err);
+      handleCameraError(err);
     });
   });
-  console.log('[CAM-DEBUG] listener anexado ao botão');
-} else {
-  console.error('[CAM-DEBUG] BOTÃO camStart NÃO ENCONTRADO NO DOM!');
-  alert('Erro: botão camStart não foi encontrado no HTML. Recarrega a página.');
 }
 
 if (camRestartBtn) {

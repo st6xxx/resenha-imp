@@ -16,6 +16,9 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* garante que [hidden] funcione mesmo em elementos com display:flex/block forçado */
+[hidden] { display: none !important; }
+
 body {
   font-family: 'Space Grotesque', -apple-system, system-ui, sans-serif;
   background: var(--bg);
@@ -182,9 +185,13 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: linear-gradient(160deg, rgba(13, 8, 32, 0.95), rgba(26, 13, 58, 0.95));
+  background: linear-gradient(160deg, rgba(13, 8, 32, 0.98), rgba(26, 13, 58, 0.98));
   text-align: center;
   z-index: 2;
+}
+/* IMPORTANTE: faz o atributo [hidden] funcionar mesmo com display:flex */
+.cam-prompt[hidden] {
+  display: none !important;
 }
 .cam-prompt.error { background: linear-gradient(160deg, rgba(60, 15, 30, 0.95), rgba(26, 13, 58, 0.95)); }
 .cam-prompt-icon {
