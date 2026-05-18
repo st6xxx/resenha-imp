@@ -212,16 +212,30 @@ function handleCameraError(err) {
 }
 
 // botões de controle da câmera — atacha direto (script já roda com DOM pronto)
+console.log('[CAM-DEBUG] admin.js carregou');
 const camStartBtn = $('camStart');
 const camRestartBtn = $('camRestart');
 const camSelectEl = $('camSelect');
+console.log('[CAM-DEBUG] camStartBtn encontrado?', !!camStartBtn);
 
 if (camStartBtn) {
   camStartBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    startCamera();
+    console.log('[CAM-DEBUG] botão clicado!');
+    // feedback visual IMEDIATO pra confirmar que o click rolou
+    camStartBtn.textContent = '⏳ ligando câmera...';
+    camStartBtn.style.background = '#c5ff3d';
+    startCamera().catch((err) => {
+      console.error('[CAM-DEBUG] startCamera lançou erro:', err);
+      alert('Erro ao iniciar câmera: ' + (err?.message || err));
+    });
   });
+  console.log('[CAM-DEBUG] listener anexado ao botão');
+} else {
+  console.error('[CAM-DEBUG] BOTÃO camStart NÃO ENCONTRADO NO DOM!');
+  alert('Erro: botão camStart não foi encontrado no HTML. Recarrega a página.');
 }
+
 if (camRestartBtn) {
   camRestartBtn.addEventListener('click', (e) => {
     e.preventDefault();
