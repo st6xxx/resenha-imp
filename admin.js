@@ -61,26 +61,165 @@ async function enterScanner() {
   $('login').hidden = true;
   $('scanner').hidden = false;
   await loadStats();
-  await startCamera();
+  // não inicia a câmera automaticamente — alguns navegadores
+  // (Safari iOS) exigem que o usuário clique antes
+  showCamPrompt('toque pra ligar a câmera', 'ligar câmera');
 }
 
-async function startCamera() {
-  if (scanner) {
-    try { await scanner.stop(); } catch {}
+function showCamPrompt(text, buttonText, isError = false) {
+  const prompt = $('camPrompt');
+  prompt.hidden = false;
+  prompt.classList.toggle('error', isError);
+  $('camPromptText').textContent = text;
+  $('camStart').textContent = buttonText || 'ligar câmera';
+  // esconde a borda amarela enquanto câmera não tá ativa
+  $('readerOverlay').hidden = true;
+}
+
+function hideCamPrompt() {
+  $('camPrompt').hidden = true;
+  $('readerOverlay').hidden = false;
+}
+
+async function listCameras() {
+  try {
+    const cams = await Html5Qrcode.getCameras();
+    return cams || [];
+  } catch {
+    return [];
   }
+}
+
+function pickCamera(cams) {
+  if (!cams.length) return null;
+  // tenta achar câmera traseira (back / environment / rear / traseira)
+  const back = cams.find((c) => /back|environment|rear|traseira/i.test(c.label));
+  if (back) return back;
+  // se tiver várias câmeras, a última costuma ser a traseira
+  if (cams.length > 1) return cams[cams.length - 1];
+  return cams[0];
+}
+
+function populateCamSelect(cams, currentId) {
+  const sel = $('camSelect');
+  sel.innerHTML = '';
+  cams.forEach((c, i) => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.label || `câmera ${i + 1}`;
+    if (c.id === currentId) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  $('camControls').hidden = cams.length < 2;
+}
+
+async function startCamera(cameraId) {
+  // 1) verifica suporte do navegador
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    showCamPrompt(
+      'seu navegador não suporta câmera. Tenta o Chrome ou Safari.',
+      'ok',
+      true
+    );
+    return;
+  }
+
+  // 2) verifica HTTPS (câmera não funciona em http://, só em https:// ou localhost)
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    showCamPrompt(
+      'a câmera só funciona em HTTPS. abre o site pela URL da Vercel (https://...)',
+      'ok',
+      true
+    );
+    return;
+  }
+
+  hideCamPrompt();
+
+  // 3) para câmera anterior se já tava rodando
+  if (scanner) {
+    try { await scanner.stop(); await scanner.clear(); } catch {}
+  }
+
   scanner = new Html5Qrcode('qrReader');
+
+  // 4) pega lista de câmeras (precisa de permissão concedida)
+  let cams = await listCameras();
+  let chosenId = cameraId;
+
+  // se não tem câmera listada ainda, tenta começar com facingMode pra disparar a permissão
+  if (!cams.length) {
+    try {
+      scanning = true;
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
+        onScan,
+        () => {}
+      );
+      // re-lista depois que a permissão foi concedida
+      cams = await listCameras();
+      populateCamSelect(cams, scanner.getRunningTrackCameraCapabilities?.()?.deviceId);
+      return;
+    } catch (err) {
+      handleCameraError(err);
+      return;
+    }
+  }
+
+  // 5) escolhe câmera
+  if (!chosenId) {
+    const cam = pickCamera(cams);
+    chosenId = cam?.id;
+  }
+  populateCamSelect(cams, chosenId);
+
+  if (!chosenId) {
+    showCamPrompt('nenhuma câmera encontrada', 'tentar de novo', true);
+    return;
+  }
+
+  // 6) inicia a câmera escolhida
   scanning = true;
   try {
     await scanner.start(
-      { facingMode: 'environment' },
-      { fps: 12, qrbox: { width: 240, height: 240 } },
+      chosenId,
+      { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
       onScan,
       () => {}
     );
   } catch (err) {
-    alert('não consegui acessar a câmera: ' + err.message);
+    handleCameraError(err);
   }
 }
+
+function handleCameraError(err) {
+  const raw = String(err?.message || err);
+  let msg = raw;
+  if (/NotAllowed|Permission/i.test(raw)) {
+    msg = 'permissão da câmera foi negada. abre as configurações do navegador e libera.';
+  } else if (/NotFound|DeviceNotFound/i.test(raw)) {
+    msg = 'nenhuma câmera encontrada no dispositivo.';
+  } else if (/NotReadable|TrackStartError/i.test(raw)) {
+    msg = 'a câmera tá sendo usada por outro app. fecha o outro app e tenta de novo.';
+  } else if (/OverconstrainedError|Constraint/i.test(raw)) {
+    msg = 'a câmera selecionada não funciona. troca pra outra no menu acima.';
+  } else if (/SecureContext|secure/i.test(raw)) {
+    msg = 'câmera só funciona em HTTPS. abre pela URL da Vercel.';
+  }
+  showCamPrompt(msg, 'tentar de novo', true);
+  console.error('[cam] erro:', err);
+}
+
+// botões de controle
+document.addEventListener('DOMContentLoaded', () => {
+  $('camStart')?.addEventListener('click', () => startCamera());
+  $('camRestart')?.addEventListener('click', () => {
+    const sel = $('camSelect');
+    startCamera(sel?.value || null);
+  });
+  $('camSelect')?.addEventListener('change', (e) => startCamera(e.target.value));
+});
 
 let lastScanTime = 0;
 let lastScanText = '';

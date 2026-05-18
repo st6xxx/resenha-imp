@@ -32,9 +32,21 @@
 
   <div class="stats" id="stats">—</div>
 
-  <div class="reader-wrap">
+  <div class="reader-wrap" id="readerWrap">
     <div id="qrReader"></div>
     <div class="reader-overlay" id="readerOverlay"></div>
+
+    <!-- estado inicial / fallback: pede pra ligar -->
+    <div class="cam-prompt" id="camPrompt">
+      <div class="cam-prompt-icon">📷</div>
+      <p id="camPromptText">toque pra ligar a câmera</p>
+      <button id="camStart" class="cam-btn">ligar câmera</button>
+    </div>
+  </div>
+
+  <div class="cam-controls" id="camControls" hidden>
+    <select id="camSelect" class="cam-select"></select>
+    <button id="camRestart" class="cam-btn-mini" title="reiniciar câmera">↻</button>
   </div>
 
   <div class="result" id="result" hidden>
