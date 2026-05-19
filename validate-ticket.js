@@ -17,10 +17,9 @@
 
 import crypto from 'crypto';
 
-const WINDOW_SECONDS = 10;
-// aceita o token da janela atual OU da janela anterior
-// (garante 10-20s de margem caso o relógio do cliente esteja levemente fora)
-const GRACE_WINDOWS = 1;
+// Token vale 10s desde a emissão + 2s de margem de rede.
+// Tudo acima de 12s é REJEITADO como expirado.
+const MAX_AGE_MS = 12000;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -90,13 +89,13 @@ function parseAndVerifyToken(raw) {
     return { error: 'invalid_format' };
   }
 
-  // Formato 2: token rotativo "ticketId.window.sig"
+  // Formato 2: token rotativo deslizante "ticketId.issuedAtMs.sig"
   if (parts.length !== 3) {
     return { error: 'invalid_format' };
   }
-  const [ticketId, windowStr, sig] = parts;
-  const windowNum = Number(windowStr);
-  if (!ticketId || !Number.isFinite(windowNum) || !sig) {
+  const [ticketId, issuedStr, sig] = parts;
+  const issuedAt = Number(issuedStr);
+  if (!ticketId || !Number.isFinite(issuedAt) || !sig) {
     return { error: 'invalid_format' };
   }
 
@@ -104,25 +103,24 @@ function parseAndVerifyToken(raw) {
   const secret = getSecret();
   if (!secret) return { error: 'server_misconfigured' };
 
-  const expected = sign(`${ticketId}.${windowNum}`, secret);
+  const expected = sign(`${ticketId}.${issuedAt}`, secret);
   if (expected !== sig) {
     return { error: 'invalid_signature' };
   }
 
-  // verifica janela de tempo
-  const nowSec = Math.floor(Date.now() / 1000);
-  const currentWindow = Math.floor(nowSec / WINDOW_SECONDS);
-  const diff = currentWindow - windowNum;
-  if (diff < 0) {
-    // janela do FUTURO — relógio do cliente adiantado demais
+  // verifica idade do token
+  const now = Date.now();
+  const age = now - issuedAt;
+  if (age < -5000) {
+    // emitido mais de 5s no futuro — relógio do servidor MP/cliente fora de sync
     return { error: 'qr_invalid_time' };
   }
-  if (diff > GRACE_WINDOWS) {
-    // janela do PASSADO — QR já expirou
+  if (age > MAX_AGE_MS) {
+    // token expirou (mais de 12s desde a emissão)
     return { error: 'qr_expired' };
   }
 
-  return { ticketId, mode: 'rotating', window: windowNum };
+  return { ticketId, mode: 'rotating', issuedAt };
 }
 
 function getSecret() {

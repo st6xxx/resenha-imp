@@ -45,6 +45,10 @@ async function fetchRotatingToken(ticketId) {
 let qrRefreshTimer = null;
 let qrCountdownTimer = null;
 
+// quanto antes de expirar a gente já pega o próximo token
+// (sobreposição garante que nunca tem QR "morto" na tela)
+const REFRESH_LEAD_MS = 1500;
+
 async function refreshQrAndCountdown(ticketId) {
   const overlay = $('qrRefreshOverlay');
   if (overlay) overlay.hidden = false;
@@ -55,17 +59,27 @@ async function refreshQrAndCountdown(ticketId) {
     // atualiza o QR
     $('qrImg').src = qrUrl(data.qr);
 
-    // atualiza a contagem regressiva
-    const expiresAt = data.expires_at; // ms
-    startCountdown(expiresAt);
+    // contagem regressiva baseada no expires_at REAL desse token específico
+    const expiresAt = data.expires_at;
+    const validMs = data.valid_ms || 10000;
+    startCountdown(expiresAt, validMs);
+
+    // agenda o próximo refresh — em vez de a cada 10s no relógio,
+    // alinha com a expiração DESSE token (sempre 1.5s antes)
+    if (qrRefreshTimer) clearTimeout(qrRefreshTimer);
+    const refreshIn = Math.max(500, expiresAt - Date.now() - REFRESH_LEAD_MS);
+    qrRefreshTimer = setTimeout(() => refreshQrAndCountdown(ticketId), refreshIn);
   } catch (err) {
     console.error('[qr] erro ao atualizar:', err);
+    // tenta de novo em 3s
+    if (qrRefreshTimer) clearTimeout(qrRefreshTimer);
+    qrRefreshTimer = setTimeout(() => refreshQrAndCountdown(ticketId), 3000);
   } finally {
     setTimeout(() => { if (overlay) overlay.hidden = true; }, 200);
   }
 }
 
-function startCountdown(expiresAt) {
+function startCountdown(expiresAt, validMs) {
   if (qrCountdownTimer) clearInterval(qrCountdownTimer);
   const bar = $('countdownBar');
   const txt = $('countdownText');
@@ -74,31 +88,23 @@ function startCountdown(expiresAt) {
   function tick() {
     const left = Math.max(0, expiresAt - Date.now());
     const leftSec = Math.ceil(left / 1000);
-    const pct = Math.max(0, Math.min(1, left / 10000));
+    const pct = Math.max(0, Math.min(1, left / validMs));
     if (bar) bar.style.transform = `scaleX(${pct})`;
     if (txt) txt.textContent = `🔄 renova em ${leftSec}s`;
     if (wrap) wrap.classList.toggle('urgent', leftSec <= 3);
     if (left <= 0) clearInterval(qrCountdownTimer);
   }
   tick();
-  qrCountdownTimer = setInterval(tick, 250);
+  qrCountdownTimer = setInterval(tick, 200);
 }
 
 function startRotation(ticketId) {
-  // primeira chamada imediata
+  // só dispara o ciclo — refreshQrAndCountdown se reagenda sozinho
   refreshQrAndCountdown(ticketId);
-  // a partir daqui renova a cada 10s alinhado
-  // (vamos checar a cada 2s pra renovar quando faltar pouco)
-  if (qrRefreshTimer) clearInterval(qrRefreshTimer);
-  qrRefreshTimer = setInterval(async () => {
-    // refaz quando o tempo restante é baixo (~1s) — alinha com a virada da janela
-    // mais simples: refaz a cada 10s exatos
-    await refreshQrAndCountdown(ticketId);
-  }, 10000);
 }
 
 function stopRotation() {
-  if (qrRefreshTimer) { clearInterval(qrRefreshTimer); qrRefreshTimer = null; }
+  if (qrRefreshTimer) { clearTimeout(qrRefreshTimer); qrRefreshTimer = null; }
   if (qrCountdownTimer) { clearInterval(qrCountdownTimer); qrCountdownTimer = null; }
 }
 
