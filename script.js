@@ -584,21 +584,80 @@ window.buzz = function buzz(pattern) {
   });
 })();
 
-// ---- MAGNETIC BUTTONS (só desktop) ----
+// ---- MAGNETIC BUTTONS (só desktop, GPU + rAF + rect cacheado) ----
 (function setupMagnetic() {
-  if (isTouchDevice()) return;
-  const buttons = document.querySelectorAll('.btn-primary, .cbtn');
+  if (isTouchDevice() || prefersReducedMotion()) return;
+  // só botões grandes — magnetic em counter +/- não faz sentido
+  const buttons = document.querySelectorAll('.btn-primary');
+
   buttons.forEach((btn) => {
-    btn.addEventListener('mousemove', (e) => {
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      const strength = 0.3; // quão forte puxa
-      btn.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
+    let rafId = null;
+    let cx = 0, cy = 0;          // posição atual (lerpada)
+    let tx = 0, ty = 0;          // posição alvo
+    let cachedRect = null;       // rect SEM transform aplicado
+    let active = false;
+
+    function measure() {
+      // tira o transform temporariamente pra pegar o rect REAL (sem distorção)
+      const prev = btn.style.transform;
       btn.style.transform = '';
+      cachedRect = btn.getBoundingClientRect();
+      btn.style.transform = prev;
+    }
+
+    function loop() {
+      // interpolação suave (lerp) — quanto menor, mais lento/suave
+      const ease = 0.18;
+      cx += (tx - cx) * ease;
+      cy += (ty - cy) * ease;
+
+      // se chegou perto o suficiente do alvo, para
+      const close = Math.abs(tx - cx) < 0.15 && Math.abs(ty - cy) < 0.15;
+      if (close) {
+        cx = tx;
+        cy = ty;
+      }
+
+      if (active || !close) {
+        // translate3d ativa aceleração de GPU + não causa reflow
+        btn.style.transform = `translate3d(${cx.toFixed(2)}px, ${cy.toFixed(2)}px, 0)`;
+      } else if (Math.abs(cx) < 0.2 && Math.abs(cy) < 0.2) {
+        // chegou em (0,0) e mouse não tá mais em cima — limpa pra CSS retomar
+        btn.style.transform = '';
+      }
+
+      if (!close || active) {
+        rafId = requestAnimationFrame(loop);
+      } else {
+        rafId = null;
+      }
+    }
+
+    btn.addEventListener('mouseenter', () => {
+      measure();
+      active = true;
+      if (!rafId) rafId = requestAnimationFrame(loop);
     });
+
+    btn.addEventListener('mousemove', (e) => {
+      if (!cachedRect) return;
+      const px = e.clientX - cachedRect.left - cachedRect.width / 2;
+      const py = e.clientY - cachedRect.top - cachedRect.height / 2;
+      // strength reduzido (0.18) pra ficar sutil
+      tx = px * 0.18;
+      ty = py * 0.18;
+    });
+
+    btn.addEventListener('mouseleave', () => {
+      active = false;
+      tx = 0;
+      ty = 0;
+      if (!rafId) rafId = requestAnimationFrame(loop);
+    });
+
+    // re-mede quando scroll/resize mudam o layout
+    window.addEventListener('scroll', () => { if (active) measure(); }, { passive: true });
+    window.addEventListener('resize', () => { if (active) measure(); });
   });
 })();
 
