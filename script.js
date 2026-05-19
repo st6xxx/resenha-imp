@@ -432,26 +432,8 @@ window.pagarMP = pagarMP;
 
 // ===== CONFIRMAR via WhatsApp =====
 function comprar() {
-  const pp = precoPorPessoa(qty);
-  const total = qty * pp;
-  const economia = qty * (PRECO_BASE - pp);
-
-  let msg = `Oi! Quero confirmar presença na RESENHA IMP 🎉%0A%0A`;
-  msg += `Quantidade: *${qty}* ${qty === 1 ? 'pessoa' : 'pessoas'}%0A`;
-  msg += `Valor por pessoa: ${fmt(pp)}%0A`;
-  if (economia > 0) msg += `Economia: ${fmt(economia)}%0A`;
-  msg += `*Total: ${fmt(total)}*`;
-
-  // anexa a lista de nomes preenchida no card (se tiver alguma)
-  if (nameRows.length && nameRows.some((r) => r.name.trim())) {
-    const icon = (g) => (g === 'F' ? '♀' : g === 'M' ? '♂' : '·');
-    const list = nameRows
-      .map((r, i) => `${i + 1}. ${icon(r.gender)} ${r.name.trim() || '—'}`)
-      .join('%0A');
-    msg += `%0A%0A*Lista:*%0A${list}`;
-  }
-
-  window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, '_blank');
+  const msg = 'Oi! Quero confirmar presença na RESENHA IMP';
+  window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 window.comprar = comprar;
 
