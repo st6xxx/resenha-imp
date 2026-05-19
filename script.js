@@ -11,8 +11,8 @@ const MAX = 10;
 // 2. Cole a URL aqui (algo como https://mpago.la/XXXXXX)
 const MP_LINK = 'https://mpago.la/SEU_LINK_AQUI';
 
-// 3. Coloque o WhatsApp do anfitrião pra dúvidas (DDI+DDD+número, sem espaços)
-const WHATSAPP = '5521900000000';
+// 3. WhatsApp do anfitrião pra dúvidas (DDI+DDD+número, sem espaços)
+const WHATSAPP = '5521995692704';
 
 // ⚠️ A gravação no Google Sheets agora é feita AUTOMATICAMENTE pelo webhook
 //    no servidor (api/webhook.js) quando o MP confirma o pagamento.

@@ -16,6 +16,9 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* garante que [hidden] funcione mesmo em elementos com display:flex/block/inline-block */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
