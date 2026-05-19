@@ -119,10 +119,20 @@ function burst(srcEl) {
 }
 
 minusBtn.addEventListener('click', (e) => {
-  if (qty > 1) { qty--; render(true); burst(e.currentTarget); }
+  if (qty > 1) {
+    qty--;
+    render(true);
+    burst(e.currentTarget);
+    if (window.buzz) window.buzz(10);
+  }
 });
 plusBtn.addEventListener('click', (e) => {
-  if (qty < MAX) { qty++; render(true); burst(e.currentTarget); }
+  if (qty < MAX) {
+    qty++;
+    render(true);
+    burst(e.currentTarget);
+    if (window.buzz) window.buzz(10);
+  }
 });
 
 // ===== TOAST =====
@@ -379,6 +389,7 @@ async function pagarMP() {
   // botão em estado de loading
   const btn = document.querySelector('.pay-stack .btn-primary.big');
   if (btn) { btn.disabled = true; btn.classList.add('loading'); }
+  if (window.buzz) window.buzz([15, 20, 15]); // tap-tap-tap confirmando
   toast('preparando pagamento...');
 
   try {
@@ -479,6 +490,150 @@ window.comprar = comprar;
   }, { threshold: 0.12, rootMargin: '0px 0px -50px 0px' });
 
   targets.forEach((el) => io.observe(el));
+})();
+
+// ============================================
+//  EFEITOS EXTRAS — sparkles, tilt, magnetic, ripple
+// ============================================
+
+const isTouchDevice = () => window.matchMedia('(hover: none)').matches;
+const isMobile = () => window.innerWidth <= 600;
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// haptic feedback nos botões importantes (só Android; iOS ignora silenciosamente)
+window.buzz = function buzz(pattern) {
+  if (navigator.vibrate && !prefersReducedMotion()) {
+    try { navigator.vibrate(pattern); } catch {}
+  }
+};
+
+// ---- SPARKLES aleatórios pela página ----
+(function setupSparkles() {
+  if (prefersReducedMotion()) return;
+  const colors = ['', 'pink', 'cyan', 'lime', 'purple']; // '' = amarelo (default)
+  // mobile = sparkles menos frequentes (economiza bateria + menos visual noise)
+  const intervalMs = isMobile() ? 1600 : 700;
+  const welcomeCount = isMobile() ? 4 : 8;
+
+  function spawn() {
+    // não spawna quando a aba tá em background
+    if (document.hidden) return;
+    const s = document.createElement('span');
+    s.className = 'sparkle ' + colors[Math.floor(Math.random() * colors.length)];
+    s.style.left = Math.random() * window.innerWidth + 'px';
+    s.style.top  = Math.random() * window.innerHeight + 'px';
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1500);
+  }
+  setInterval(spawn, intervalMs);
+  for (let i = 0; i < welcomeCount; i++) setTimeout(spawn, i * 140);
+})();
+
+// ---- CURSOR GLOW (só desktop) ----
+(function setupCursorGlow() {
+  if (isTouchDevice()) return;
+  const glow = document.createElement('div');
+  glow.className = 'cursor-glow';
+  document.body.appendChild(glow);
+
+  let rafId = null;
+  let targetX = window.innerWidth / 2;
+  let targetY = window.innerHeight / 2;
+  let currentX = targetX, currentY = targetY;
+
+  window.addEventListener('mousemove', (e) => {
+    targetX = e.clientX;
+    targetY = e.clientY;
+    if (!rafId) loop();
+  });
+
+  function loop() {
+    // segue o cursor com lag suave
+    currentX += (targetX - currentX) * 0.15;
+    currentY += (targetY - currentY) * 0.15;
+    glow.style.left = currentX + 'px';
+    glow.style.top  = currentY + 'px';
+    if (Math.abs(targetX - currentX) > 0.5 || Math.abs(targetY - currentY) > 0.5) {
+      rafId = requestAnimationFrame(loop);
+    } else {
+      rafId = null;
+    }
+  }
+})();
+
+// ---- TILT 3D em cards (só desktop) ----
+(function setupTilt() {
+  if (isTouchDevice()) return;
+  const cards = document.querySelectorAll('.hl-card, .tier');
+  cards.forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = ((y - centerY) / centerY) * -8; // -8 a 8 graus
+      const rotateY = ((x - centerX) / centerX) * 8;
+      card.classList.add('tilting');
+      card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px) scale(1.02)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.classList.remove('tilting');
+      card.style.transform = '';
+    });
+  });
+})();
+
+// ---- MAGNETIC BUTTONS (só desktop) ----
+(function setupMagnetic() {
+  if (isTouchDevice()) return;
+  const buttons = document.querySelectorAll('.btn-primary, .cbtn');
+  buttons.forEach((btn) => {
+    btn.addEventListener('mousemove', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      const strength = 0.3; // quão forte puxa
+      btn.style.transform = `translate(${x * strength}px, ${y * strength}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+      btn.style.transform = '';
+    });
+  });
+})();
+
+// ---- RIPPLE em cliques ----
+(function setupRipple() {
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn');
+    if (!btn) return;
+    const rect = btn.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top  = (e.clientY - rect.top - size / 2) + 'px';
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 750);
+  });
+})();
+
+// ---- NUMBER POP — observa os valores e anima quando mudam ----
+(function watchNumberChanges() {
+  const ids = ['perPerson', 'discount', 'mpAmount'];
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let last = el.textContent;
+    const obs = new MutationObserver(() => {
+      if (el.textContent === last) return;
+      last = el.textContent;
+      el.style.transform = 'scale(1.18)';
+      setTimeout(() => { el.style.transform = ''; }, 320);
+    });
+    obs.observe(el, { childList: true, characterData: true, subtree: true });
+  });
 })();
 
 // render inicial — DEPOIS de tudo estar declarado (nameRows, syncNameRows, etc)

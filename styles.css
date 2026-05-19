@@ -19,6 +19,22 @@
 /* garante que [hidden] funcione mesmo em elementos com display:flex/block/inline-block */
 [hidden] { display: none !important; }
 
+/* evita zoom acidental ao dar dois toques rápidos em botões/inputs */
+button, a, .btn, .cbtn, input, select, textarea {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* RESPEITA acessibilidade: se o usuário pediu menos animação, mata tudo */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.05ms !important;
+  }
+  .sparkle, .blob, .floater, .grain, .cursor-glow { display: none !important; }
+}
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -992,6 +1008,141 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* ============================================
+   EFEITOS EXTRAS
+============================================ */
+
+/* ----- SPARKLES aleatórios pela página ----- */
+.sparkle {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+  z-index: 4;
+  background: var(--yellow);
+  border-radius: 50%;
+  filter: blur(0.5px);
+  box-shadow:
+    0 0 6px var(--yellow),
+    0 0 12px rgba(255, 217, 61, 0.6),
+    0 0 20px rgba(255, 217, 61, 0.3);
+  animation: sparkleIn 1.4s ease-out forwards;
+  will-change: transform, opacity;
+}
+.sparkle.pink   { background: var(--pink);   box-shadow: 0 0 6px var(--pink), 0 0 14px rgba(255, 62, 165, 0.5), 0 0 22px rgba(255, 62, 165, 0.25); }
+.sparkle.cyan   { background: var(--cyan);   box-shadow: 0 0 6px var(--cyan), 0 0 14px rgba(0, 229, 255, 0.5),  0 0 22px rgba(0, 229, 255, 0.25); }
+.sparkle.lime   { background: var(--lime);   box-shadow: 0 0 6px var(--lime), 0 0 14px rgba(197, 255, 61, 0.5), 0 0 22px rgba(197, 255, 61, 0.25); }
+.sparkle.purple { background: var(--purple); box-shadow: 0 0 6px var(--purple), 0 0 14px rgba(139, 92, 246, 0.5), 0 0 22px rgba(139, 92, 246, 0.25); }
+
+@keyframes sparkleIn {
+  0%   { opacity: 0; transform: scale(0) rotate(0deg); }
+  30%  { opacity: 1; transform: scale(1.4) rotate(120deg); }
+  60%  { opacity: 1; transform: scale(0.9) rotate(240deg); }
+  100% { opacity: 0; transform: scale(0) rotate(360deg) translateY(-30px); }
+}
+
+/* ----- CURSOR GLOW (só desktop) ----- */
+.cursor-glow {
+  position: fixed;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 62, 165, 0.18), rgba(0, 229, 255, 0.08) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  filter: blur(40px);
+  transition: opacity 0.3s;
+  opacity: 0;
+  will-change: left, top;
+  mix-blend-mode: screen;
+}
+@media (hover: hover) and (pointer: fine) {
+  body:hover .cursor-glow { opacity: 1; }
+}
+@media (hover: none) {
+  .cursor-glow { display: none; }
+}
+
+/* ----- TILT 3D em cards (efeito de profundidade) ----- */
+.hl-card,
+.tier {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.2s ease-out, border-color 0.25s, background 0.4s;
+}
+.hl-card.tilting,
+.tier.tilting {
+  transition: transform 0.05s ease-out;
+}
+
+/* ----- RIPPLE em cliques ----- */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 248, 240, 0.35);
+  transform: scale(0);
+  animation: rippleExpand 0.7s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+.btn { position: relative; overflow: hidden; }
+
+/* ----- GRADIENT CYCLING em alguns títulos ----- */
+.tix h2 em,
+.vibes-head h2 em {
+  background-size: 250% 100% !important;
+  animation: shine 4s ease-in-out infinite, gradientShift 8s ease-in-out infinite;
+}
+@keyframes gradientShift {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50%      { filter: hue-rotate(40deg); }
+}
+
+/* ----- NUMBER ANIMATION (escala suave ao mudar) ----- */
+.brk-total span:last-child,
+#perPerson,
+#discount,
+#mpAmount {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ----- MAGNETIC BUTTONS (só desktop) ----- */
+.btn-primary,
+.cbtn {
+  transition: transform 0.18s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s;
+}
+
+/* ----- GLOW PULSE em elementos ativos ----- */
+.tier.active {
+  animation: tierWiggle 0.7s cubic-bezier(.34,1.56,.64,1), tierGlow 2.5s ease-in-out infinite 0.7s;
+}
+@keyframes tierGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 62, 165, 0); }
+  50%      { box-shadow: 0 0 0 8px rgba(255, 62, 165, 0.15); }
+}
+
+/* ----- HOVER WAVE no name-row (lista de pessoas) ----- */
+.name-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, rgba(255, 62, 165, 0.06), transparent);
+  opacity: 0;
+  transform: translateX(-100%);
+  transition: transform 0.6s ease, opacity 0.3s;
+  pointer-events: none;
+}
+.name-row { position: relative; overflow: hidden; }
+.name-row:hover::before {
+  opacity: 1;
+  transform: translateX(100%);
+}
+
 /* ===== RESPONSIVO ===== */
 @media (max-width: 600px) {
   .hero { padding: 40px 20px 24px; min-height: 70vh; }
@@ -1003,4 +1154,35 @@ body {
   .tier-n { font-size: 12px; }
   .tier-pp { font-size: 15px; }
   .tier-each { font-size: 8px; letter-spacing: 0.1em; }
+
+  /* MENOS sparkles + emojis no mobile (visual e bateria) */
+  .sparkle { width: 4px; height: 4px; }
+  /* mostra só 4 dos 7 floaters em tela pequena */
+  .floater:nth-child(n+5) { display: none; }
+  .floater { font-size: 22px; }
+
+  /* tira o cursor glow no mobile (já protege via media query mas reforço) */
+  .cursor-glow { display: none; }
+
+  /* botões de pagamento mais "tappable" — mais altos */
+  .btn.big {
+    padding: 20px 18px;
+    font-size: 16px;
+    min-height: 56px;  /* 48px é o mínimo recomendado pelo Apple/Google */
+  }
+
+  /* counter +/- maior pra ser fácil de tocar */
+  .cbtn {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+
+  /* gradient cycling no mobile pode causar pequenos engasgos — desliga */
+  .tix h2 em, .vibes-head h2 em { animation: shine 4s ease-in-out infinite !important; }
+}
+
+/* tablet/portrait — mantém uns floaters */
+@media (max-width: 900px) and (min-width: 601px) {
+  .floater:nth-child(n+6) { display: none; }
 }
