@@ -1008,6 +1008,21 @@ body {
   letter-spacing: 0.04em;
 }
 
+.footer-signature {
+  margin-top: 18px !important;
+  font-family: 'Caveat', 'Bricolage Grotesque', cursive;
+  font-size: 22px !important;
+  letter-spacing: 0.04em !important;
+  background: linear-gradient(135deg, var(--pink), var(--yellow), var(--cyan));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 4s ease-in-out infinite;
+  display: inline-block;
+  padding: 0 0.1em;
+}
+
 /* ============================================
    EFEITOS EXTRAS
 ============================================ */
